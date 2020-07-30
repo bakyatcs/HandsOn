@@ -1,0 +1,27 @@
+node{
+stage('git checkout'){
+    git credentialsId: 'gitlogin', url: 'https://github.com/bakyatcs/HandsOn.git'
+}
+stage('maven code build & test'){
+def mavenLocal = tool name : 'maven-3.0' , type: 'maven'
+def mavenCommand = "${mavenLocal}/bin/mvn"
+sh "cd cicd-pipeline && ${mavenCommand} clean package"
+}
+stage('build docker image'){
+Image = docker.build("bakyamech/pcfdeploy","./cicd-pipeline")
+}
+stage('push docker image'){
+withDockerRegistry(credentialsId: 'dockerhub1', toolName: 'docker') {
+Image.push()
+}
+}
+stage('deploy to PCF'){
+def url="https://api.run.pivotal.io"
+
+withCredentials([usernamePassword(credentialsId: 'pcf', passwordVariable: 'password', usernameVariable: 'username')]) {
+    sh "cf login -a ${url} -u ${username} -p ${password} -o bakyatcs -s development"
+}
+sh "cf push bakyatestapp --docker-image bakyamech/pcfdeploy"
+}
+}
+

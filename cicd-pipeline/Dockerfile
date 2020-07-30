@@ -1,5 +1,7 @@
   
-FROM openjdk:8-jdk-alpine
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+  
+FROM java:8
+EXPOSE 8083
+COPY /target/cicd-pipeline-0.0.1-SNAPSHOT.jar cicd-pipeline-0.0.1-SNAPSHOT.jar
+MAINTAINER "bakyamech@gmail.com"
+ENTRYPOINT ["java","-jar","cicd-pipeline-0.0.1-SNAPSHOT.jar"]
